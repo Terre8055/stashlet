@@ -10,8 +10,8 @@ from bottle import (
     HTTPError, 
     json_dumps
 )
-from user_db_manager import UserDBManager
 
+from user_db_manager import UserDBManager
 
 @get('/register')
 def register():
@@ -72,14 +72,15 @@ def login():
             User_string: <input name="request_string" type="text" />
             <input value="Login" type="submit" />
         </form>
+        <a href="/forgot-password"><button>Forgot Password</button></a>
     '''
 
 @post('/login')
 def do_login():
-    model = UserDBManager()
-    
     get_id_from_cookie = request.get_cookie('_id')
     get_req_string = request.forms.get('request_string')
+    model = UserDBManager(get_id_from_cookie)
+    
     print(get_id_from_cookie, 'idddcook')
     req = {'uid': get_id_from_cookie, 'request_string' : get_req_string}
     print(req, 'reqqq')
@@ -105,5 +106,17 @@ def do_login():
            print(e, '---> Error')
            return HTTPError(status=500, body='Server responded with failure, check back later')
     return HTTPError(status=403, body='User not found')
+
+
+@get("/forgot-password")
+def forgot_password():
+    return '''
+        <form action="/forgot-password" method="post">
+            UserID: <input name="user_id" type="text" />
+            Secure User String: <input name="sus" type="text" />
+            <input value="Submit" type="submit" />
+        </form>
+        <a href="/login"><button>Abort</button></a>
+    '''
 
 r(host='localhost', port=8080, debug=True, reloader=True)
