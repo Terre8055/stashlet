@@ -20,6 +20,7 @@ def register():
             User-String: <input name="request_string" type="text" />
             <input value="Register" type="submit" />
         </form>
+        <a href="/login"><button>Already have an account</button></a>
     '''
     
 @post('/register')
@@ -72,6 +73,7 @@ def login():
             User_string: <input name="request_string" type="text" />
             <input value="Login" type="submit" />
         </form>
+        <a href="/register"><button>Create Account</button></a>
         <a href="/forgot-password"><button>Forgot Password</button></a>
     '''
 
