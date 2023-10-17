@@ -25,12 +25,12 @@ def register():
     
 @post('/register')
 def do_register():
-    base_model = UserDBManager()
     u_string = request.forms.get('request_string')
     req = {'request_string': u_string}
     print(req, 'bkendreq')
-    if req.get('request_string') is not None:
+    if req.get('request_string'):
         try:
+            base_model = UserDBManager()
             serializer = base_model.store_user_string(req).get('id')
             print(serializer, 'id')
             if serializer:
@@ -81,13 +81,13 @@ def login():
 def do_login():
     get_id_from_cookie = request.get_cookie('_id')
     get_req_string = request.forms.get('request_string')
-    model = UserDBManager(get_id_from_cookie)
     
     print(get_id_from_cookie, 'idddcook')
     req = {'uid': get_id_from_cookie, 'request_string' : get_req_string}
     print(req, 'reqqq')
-    if req.get('uid') is not None and get_req_string is not None:
+    if get_id_from_cookie and get_req_string:
        try:
+            model = UserDBManager(get_id_from_cookie)
             verify = model.verify_user(req)
             print(verify, 'verify')
             if verify == 'Success':
@@ -144,10 +144,37 @@ def do_forgot_password():
 def enter_new_strings():
     return '''
         <form action="/enter-new-string" method="post">
-            UserID: <input name="user_id" type="text" />
+            User_String: <input name="user_string" type="text" />
             <input value="Submit" type="submit" />
         </form>
         <a href="/login"><button>Return to Login Page⬅️</button></a>
     '''
 
+
+@post('/enter-new-string')
+def do_enter_new_string():
+    new_user_string = request.forms.get('user_string')
+    get_id = request.cookies.get('_id')
+    if not new_user_string and not get_id:
+        return HTTPError(status=400)
+    request_data = {'_id': get_id, 'user_string' : new_user_string}
+    print(request_data, 'enter')
+    model = UserDBManager(get_id)
+    response_data = model.recover_account(request_data)
+    print(response_data, 'rdd')
+    if response_data:
+        get_uid = response_data.get('_id')
+        get_new_sus = response_data.get('sus')
+        return HTTPResponse(
+            body='Account Recovered Successfully, check mail for details..',
+            status=200,
+            headers={
+                    'Content-Type': 'text/plain',
+                    'Set-Cookie': f'_id={get_uid};\
+                    Path=/login'
+                }
+        )
+    return HTTPError(status=400)
+        
+    
 r(host='localhost', port=8080, debug=True, reloader=True)
