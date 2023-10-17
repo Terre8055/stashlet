@@ -94,6 +94,7 @@ def do_login():
                get_sus = model.deserialize_data(
                    get_id_from_cookie, 'secured_user_string'
                 )
+               print(get_sus, 'sus')
                return HTTPResponse(
                    body='Authentication Successful',
                    status=201,
@@ -119,6 +120,34 @@ def forgot_password():
             <input value="Submit" type="submit" />
         </form>
         <a href="/login"><button>Abort</button></a>
+    '''
+    
+
+@post('/forgot-password')
+def do_forgot_password():
+    get_uid = request.forms.get('user_id')
+    get_sus = request.forms.get('sus')
+    model = UserDBManager(get_uid)
+    if not get_sus and not get_uid:
+        return HTTPError(status=400)
+    req = {}
+    req.update(uid= get_uid, secured_user_string = get_sus)
+    x = model.check_sus_integrity(req)
+    if x == 'Success':
+        HTTPResponse(body='Validation completed, redirecting..', status=200)
+        return redirect("/enter-new-string", code=302)
+    HTTPError(status=403)    
+    return redirect('/login')
+
+
+@get('/enter-new-string')
+def enter_new_strings():
+    return '''
+        <form action="/enter-new-string" method="post">
+            UserID: <input name="user_id" type="text" />
+            <input value="Submit" type="submit" />
+        </form>
+        <a href="/login"><button>Return to Login Page⬅️</button></a>
     '''
 
 r(host='localhost', port=8080, debug=True, reloader=True)
