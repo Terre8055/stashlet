@@ -17,6 +17,7 @@ from pydantic import ValidationError
 from models import User
 from redis_om import NotFoundError
 
+
 @get('/register')
 def register():
     return '''
@@ -91,9 +92,9 @@ def do_login():
     get_req_string = request.forms.get('request_string')
     print(get_id_from_cookie, 'idddcook')
     try:
-        get_user = User.get("01HDC658R5DNJK0HNXGQ9KWS7Q")
-        print(get_user, 'gu')
-        return redirect('/dashboard')
+        get_user = User.get("01HDCGXB809P2CNSG4KDXC05Y5")
+        if get_user.is_authenticated and get_user.session_id == get_session_from_cookie:
+            return redirect('/dashboard')
     except NotFoundError:
         print('not-found')
         pass
@@ -209,7 +210,33 @@ def do_enter_new_string():
 def dashboard():
     return '''
             <p>Welcome Home</p>
+            <a href="/logout"><button>Logout⬅️</button></a>
     '''
         
+
+
+@get('/logout')
+def do_logout():
+    get_id = request.get_cookie('_id') 
+    get_session = request.get_cookie('session')
+    if not get_id or not get_session:
+        return redirect('/login')
+
+    # Delete cookies from the response to log the user out
+    response.delete_cookie('_id')
+    response.delete_cookie('session')
+    try:
+        user = User.get("01HDCGXB809P2CNSG4KDXC05Y5")
+        user.session_id = None
+        user.is_authenticated = False
+        user.save()
+    except Exception as e:
+        print(f"Error while logging out: {e}")
+        
+    return redirect('/login')
+
     
+    
+    
+     
 r(host='localhost', port=8080, debug=True, reloader=True)
