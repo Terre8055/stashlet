@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from bottle import run as r
 from bottle import route as rt
 from bottle import (
@@ -12,6 +13,9 @@ from bottle import (
 )
 
 from user_db_manager import UserDBManager
+from pydantic import ValidationError
+from models import User
+from redis_om import NotFoundError
 
 @get('/register')
 def register():
@@ -38,6 +42,8 @@ def do_register():
                     serializer, 
                     'secured_user_string'
                 )
+                expiration_date = datetime.now() + timedelta(days=2)
+                expires = expiration_date.strftime('%a, %d %b %Y %H:%M:%S GMT')
                 return HTTPResponse(
                     body=json_dumps(
                         {
@@ -48,8 +54,7 @@ def do_register():
                     status=201,
                     headers={
                         'Content-Type': 'text/plain',
-                        'Set-Cookie': f'_id={serializer};\
-                        Path=/'
+                        'Set-Cookie': f'_id={serializer}; Expires={expires}; Path=/'
                     }
                 )
             else:
@@ -79,10 +84,19 @@ def login():
 
 @post('/login')
 def do_login():
-    get_id_from_cookie = request.get_cookie('_id')
-    get_req_string = request.forms.get('request_string')
     
+    get_id_from_cookie = request.get_cookie('_id')
+    get_session_from_cookie = request.get_cookie('session') if request.get_cookie('session') else None
+    print(get_session_from_cookie, 'gsc')
+    get_req_string = request.forms.get('request_string')
     print(get_id_from_cookie, 'idddcook')
+    try:
+        get_user = User.get("01HDC658R5DNJK0HNXGQ9KWS7Q")
+        print(get_user, 'gu')
+        return redirect('/dashboard')
+    except NotFoundError:
+        print('not-found')
+        pass
     req = {'uid': get_id_from_cookie, 'request_string' : get_req_string}
     print(req, 'reqqq')
     if get_id_from_cookie and get_req_string:
@@ -95,18 +109,32 @@ def do_login():
                    get_id_from_cookie, 'secured_user_string'
                 )
                print(get_sus, 'sus')
+               expiration_date = datetime.now() + timedelta(days=2)
+               expires = expiration_date.strftime('%a, %d %b %Y %H:%M:%S GMT')
+               print('Saving to REDIS')
+               try:
+                save_to_central_db = User(
+                    ir_id = get_id_from_cookie,
+                    session_id = 2023,
+                    is_authenticated = True,
+                    username = 'admin'
+                )
+               except ValidationError as e:
+                   print('Error Foud: ', e)
+               save_to_central_db.save()
+               print('Saved to REDIS')
                return HTTPResponse(
                    body='Authentication Successful',
                    status=201,
                    headers={
                         'Content-Type': 'text/plain',
-                        'Set-Cookie': f'sus={get_sus};\
-                        Path=/login'
+                        'Set-Cookie': f'session=2023; Expires={expires}; Path=/'
+                        
                     }
                 )
             return HTTPError(status=403, body='Authentication failed, check login details')
        except Exception as e:
-           print(e, '---> Error')
+           print(e)
            return HTTPError(status=500, body='Server responded with failure, check back later')
     return HTTPError(status=403, body='User not found')
 
@@ -163,18 +191,25 @@ def do_enter_new_string():
     response_data = model.recover_account(request_data)
     print(response_data, 'rdd')
     if response_data:
-        get_uid = response_data.get('_id')
+        # get_uid = response_data.get('_id')
         get_new_sus = response_data.get('sus')
         return HTTPResponse(
             body='Account Recovered Successfully, check mail for details..',
             status=200,
             headers={
                     'Content-Type': 'text/plain',
-                    'Set-Cookie': f'_id={get_uid};\
-                    Path=/login'
+                    'Set-Cookie': f'new_sus={get_new_sus};\
+                    Path=/'
                 }
         )
     return HTTPError(status=400)
+
+
+@get('/dashboard')
+def dashboard():
+    return '''
+            <p>Welcome Home</p>
+    '''
         
     
 r(host='localhost', port=8080, debug=True, reloader=True)
