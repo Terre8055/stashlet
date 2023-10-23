@@ -1,3 +1,5 @@
+import shortuuid, uuid
+from http.cookies import SimpleCookie
 from datetime import datetime, timedelta
 from bottle import run as r
 from bottle import route as rt
@@ -55,7 +57,7 @@ def do_register():
                     status=201,
                     headers={
                         'Content-Type': 'text/plain',
-                        'Set-Cookie': f'_id={serializer}; Expires={expires}; Path=/'
+                        'Set-Cookie': f'uid={serializer}; Expires={expires}; Path=/'
                     }
                 )
             else:
@@ -74,6 +76,7 @@ def do_register():
         
 @get('/login')
 def login():
+    print(request.cookies.get('profile_id'))
     return '''
         <form action="/login" method="post">
             User_string: <input name="request_string" type="text" />
@@ -86,53 +89,72 @@ def login():
 @post('/login')
 def do_login():
     
-    get_id_from_cookie = request.get_cookie('_id')
-    get_session_from_cookie = request.get_cookie('session') if request.get_cookie('session') else None
-    print(get_session_from_cookie, 'gsc')
+    user_profile = request.cookies.get('profile_id')
+    session_id = request.cookies.get('session_id')
+    get_uid = request.cookies.get('uid')
+    print(get_uid, 'guu')
+    
+    
+    if not get_uid:
+        return HTTPError(status=403, body='You do not have an account, please register')
+    
+    
+    get_profile = user_profile
+    if get_profile:
+
+        try:
+            get_user = User.get(user_profile)
+            print(get_user, 'user')
+            if get_user.session_id == session_id and get_user.is_authenticated:
+                return redirect('/dashboard')
+        except NotFoundError:
+            print('User not found')
+            pass
+    print('empty profile')
     get_req_string = request.forms.get('request_string')
-    print(get_id_from_cookie, 'idddcook')
-    try:
-        get_user = User.get("01HDCGXB809P2CNSG4KDXC05Y5")
-        if get_user.is_authenticated and get_user.session_id == get_session_from_cookie:
-            return redirect('/dashboard')
-    except NotFoundError:
-        print('not-found')
-        pass
-    req = {'uid': get_id_from_cookie, 'request_string' : get_req_string}
-    print(req, 'reqqq')
-    if get_id_from_cookie and get_req_string:
+    req = {'uid': get_uid, 'request_string' : get_req_string}
+    
+    if get_uid and get_req_string:
        try:
-            model = UserDBManager(get_id_from_cookie)
+            model = UserDBManager(get_uid)
             verify = model.verify_user(req)
             print(verify, 'verify')
             if verify == 'Success':
                get_sus = model.deserialize_data(
-                   get_id_from_cookie, 'secured_user_string'
+                   get_uid, 'secured_user_string'
                 )
+               
                print(get_sus, 'sus')
                expiration_date = datetime.now() + timedelta(days=2)
                expires = expiration_date.strftime('%a, %d %b %Y %H:%M:%S GMT')
                print('Saving to REDIS')
+               generate_unique_id = uuid.uuid4()
+               encode_id_to_session = shortuuid.encode(generate_unique_id)
                try:
-                save_to_central_db = User(
-                    ir_id = get_id_from_cookie,
-                    session_id = 2023,
+                user_profile = User(
+                    ir_id = get_uid,
+                    session_id = encode_id_to_session,
                     is_authenticated = True,
-                    username = 'admin'
                 )
                except ValidationError as e:
-                   print('Error Foud: ', e)
-               save_to_central_db.save()
+                   print('Error Found: ', e)
+                   return
+               user_profile.save()
+               user_profile_id = user_profile.pk
                print('Saved to REDIS')
-               return HTTPResponse(
-                   body='Authentication Successful',
-                   status=201,
-                   headers={
-                        'Content-Type': 'text/plain',
-                        'Set-Cookie': f'session=2023; Expires={expires}; Path=/'
-                        
-                    }
-                )
+               profile = {
+                    "session_id": encode_id_to_session,
+                    "profile_id" : user_profile_id,
+               }
+               session_cookie = f'session_id={profile["session_id"]}; Path=/; Expires={expires};'
+               profile_cookie = f'profile_id={profile["profile_id"]}; Path=/; Expires={expires};'
+               
+               responsed = HTTPResponse(body='Authentication Successful', status=201)
+               responsed.add_header('Set-Cookie', profile_cookie)
+               responsed.add_header('Set-Cookie', session_cookie)
+               
+               return responsed
+
             return HTTPError(status=403, body='Authentication failed, check login details')
        except Exception as e:
            print(e)
@@ -142,6 +164,7 @@ def do_login():
 
 @get("/forgot-password")
 def forgot_password():
+    
     return '''
         <form action="/forgot-password" method="post">
             UserID: <input name="user_id" type="text" />
@@ -200,7 +223,7 @@ def do_enter_new_string():
             headers={
                     'Content-Type': 'text/plain',
                     'Set-Cookie': f'new_sus={get_new_sus};\
-                    Path=/'
+                    Path=/login'
                 }
         )
     return HTTPError(status=400)
@@ -217,16 +240,16 @@ def dashboard():
 
 @get('/logout')
 def do_logout():
-    get_id = request.get_cookie('_id') 
-    get_session = request.get_cookie('session')
-    if not get_id or not get_session:
+    get_profile = request.cookies.get('profile_id')
+    if not get_profile:
         return redirect('/login')
 
     # Delete cookies from the response to log the user out
-    response.delete_cookie('_id')
-    response.delete_cookie('session')
+    response.delete_cookie('profile_id')
+    response.delete_cookie('session_id')
+    
     try:
-        user = User.get("01HDCGXB809P2CNSG4KDXC05Y5")
+        user = User.get(get_profile)
         user.session_id = None
         user.is_authenticated = False
         user.save()
