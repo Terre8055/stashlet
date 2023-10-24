@@ -1,4 +1,4 @@
-import shortuuid, uuid
+import shortuuid, uuid, time
 from http.cookies import SimpleCookie
 from datetime import datetime, timedelta
 from bottle import run as r
@@ -16,7 +16,7 @@ from bottle import (
 
 from user_db_manager import UserDBManager
 from pydantic import ValidationError
-from models import User
+from models import User, Session
 from redis_om import NotFoundError
 
 
@@ -76,7 +76,6 @@ def do_register():
         
 @get('/login')
 def login():
-    print(request.cookies.get('profile_id'))
     return '''
         <form action="/login" method="post">
             User_string: <input name="request_string" type="text" />
@@ -88,22 +87,19 @@ def login():
 
 @post('/login')
 def do_login():
-    
     user_profile = request.cookies.get('profile_id')
     session_id = request.cookies.get('session_id')
     get_uid = request.cookies.get('uid')
     print(get_uid, 'guu')
     
-    
     if not get_uid:
         return HTTPError(status=403, body='You do not have an account, please register')
-    
     
     get_profile = user_profile
     if get_profile:
 
         try:
-            get_user = User.get(user_profile)
+            get_user = Session.get(user_profile)
             print(get_user, 'user')
             if get_user.session_id == session_id and get_user.is_authenticated:
                 return redirect('/dashboard')
@@ -131,20 +127,22 @@ def do_login():
                generate_unique_id = uuid.uuid4()
                encode_id_to_session = shortuuid.encode(generate_unique_id)
                try:
-                user_profile = User(
-                    ir_id = get_uid,
+                user_session = Session(
                     session_id = encode_id_to_session,
                     is_authenticated = True,
                 )
                except ValidationError as e:
-                   print('Error Found: ', e)
+                   print(e)
                    return
-               user_profile.save()
-               user_profile_id = user_profile.pk
+               user_session.save()
+               # Calculate the expiration time (2 days from now) in seconds
+               expiration_time = time.time() + (2 * 24 * 60 * 60) 
+               user_session.expire(int(expiration_time - time.time()))
+               user_session_id = user_session.pk
                print('Saved to REDIS')
                profile = {
                     "session_id": encode_id_to_session,
-                    "profile_id" : user_profile_id,
+                    "profile_id" : user_session_id, #query redis collection
                }
                session_cookie = f'session_id={profile["session_id"]}; Path=/; Expires={expires};'
                profile_cookie = f'profile_id={profile["profile_id"]}; Path=/; Expires={expires};'
@@ -229,15 +227,6 @@ def do_enter_new_string():
     return HTTPError(status=400)
 
 
-@get('/dashboard')
-def dashboard():
-    return '''
-            <p>Welcome Home</p>
-            <a href="/logout"><button>Logout⬅️</button></a>
-    '''
-        
-
-
 @get('/logout')
 def do_logout():
     get_profile = request.cookies.get('profile_id')
@@ -248,17 +237,22 @@ def do_logout():
     response.delete_cookie('profile_id')
     response.delete_cookie('session_id')
     
-    try:
-        user = User.get(get_profile)
-        user.session_id = None
-        user.is_authenticated = False
-        user.save()
-    except Exception as e:
-        print(f"Error while logging out: {e}")
-        
+    Session.delete(get_profile)
+
     return redirect('/login')
 
+#################################################################################
+#################################################################################
+            #PUBLIC FACING ROUTES#
+#################################################################################
+#################################################################################
     
+@get('/dashboard')
+def dashboard():
+    return '''
+            <p>Welcome Home</p>
+            <a href="/logout"><button>Logout⬅️</button></a>
+    '''
     
     
      
