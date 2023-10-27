@@ -197,7 +197,7 @@ def do_forgot_password():
     
     get_sus = request.forms.get('sus')
     
-    if not get_sus and not get_uid:
+    if not get_sus or not get_uid:
         return HTTPError(status= HTTP_400_BAD_REQUEST)
     
     model = UserDBManager(get_uid)
@@ -236,7 +236,7 @@ def do_enter_new_string():
     
     get_id = request.cookies.get('_id')
     
-    if not new_user_string and not get_id:
+    if not new_user_string or not get_id:
         return HTTPError(status=HTTP_400_BAD_REQUEST)
     
     request_data = {'_id': get_id, 'user_string' : new_user_string}
