@@ -55,6 +55,8 @@ def do_register():
                     'secured_user_string'
                 )
                 
+                print(get_secure_strings)
+                
                 expiration_date = datetime.now() + timedelta(days=2)
                 cookie_expires = expiration_date.strftime('%a, %d %b %Y %H:%M:%S GMT')
                 
@@ -92,7 +94,6 @@ def login():
 
         try:
             get_user = Session.get(user_profile)
-            print(get_user, 'user')
             if get_user.session_id == session_id and get_user.is_authenticated:
                 return redirect(GHOME, code= HTTP_303_SEE_OTHER)
         except NotFoundError:
@@ -280,3 +281,58 @@ def do_logout():
     response.delete_cookie('session_id', path=GHOMEPAGE)
     
     return redirect(GHOMEPAGE, code= HTTP_302_FOUND)
+
+
+@auth.route(CLOSE_ACCOUNT)
+def close_account():
+
+    user_profile = request.cookies.get('profile_id')
+    
+    session_id = request.cookies.get('session_id')
+    
+    if user_profile and session_id:
+
+        try:
+            get_user = Session.get(user_profile)
+            if get_user.session_id == session_id and get_user.is_authenticated:
+                return '''
+                    <form action="/auth/close-account" method="post">
+                        Secure User String: <input name="sus" type="text" />
+                        <input value="Submit" type="submit" />
+                    </form>
+                    <a href="/auth/login"><button>Cancel⬅️</button></a>
+                '''
+        except NotFoundError:
+            return HTTPError(status=HTTP_403_FORBIDDEN, body='You do not have the required permissions to access this resource')
+    return redirect(GLOGIN)
+
+
+@auth.route(CLOSE_ACCOUNT, method='POST')
+def do_close_account():
+    user_id = request.cookies.get('uid')
+    secure_user_string = request.forms.get('sus')
+    user_profile = request.cookies.get('profile_id')
+    
+    
+    if not user_id:
+        return redirect(GREGISTER)
+    if not secure_user_string:
+        return HTTPError(status=HTTP_400_BAD_REQUEST, body='Validation Error')
+    
+    req = {'uid': user_id, 'sus': secure_user_string}
+    try:
+        data = UserDBManager(user_id).close_account(req)
+        if data == 'Success':
+            #delete user session in session model
+            Session.delete(user_profile)
+            
+            # Delete cookies in the user-agent
+            response.delete_cookie('profile_id', path=GHOMEPAGE)
+            response.delete_cookie('session_id', path=GHOMEPAGE)
+            response.delete_cookie('uid', path=GHOMEPAGE)
+
+            return redirect(GHOMEPAGE)
+        return HTTPError(body='Error closing account, kindly check details and try again')
+    except KeyError as e:
+        return HTTPError(status=HTTP_400_BAD_REQUEST)
+
