@@ -50,7 +50,7 @@ def do_register():
             print(serializer, 'id')
             
             if serializer:
-                get_secure_strings = base_model.deserialize_data(
+                get_secure_strings = base_model.deserialize_data( #check init
                     serializer, 
                     'secured_user_string'
                 )
@@ -76,7 +76,7 @@ def do_register():
             print(f'Error during registration: {str(e)}')
             return HTTPError(status= HTTP_500_INTERNAL_SERVER_ERROR)
             
-    return HTTPError(status= HTTP_400_BAD_REQUEST)
+    return HTTPError(status= HTTP_400_BAD_REQUEST, body='Empty request body')
         
         
 @auth.route(LOGIN)
