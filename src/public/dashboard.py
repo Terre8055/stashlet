@@ -37,11 +37,11 @@ def root():#TODO verify sessions
 
         try:
             get_user = Session.get(user_profile)
-            print(get_user, 'user')
             if get_user.session_id == session_id and get_user.is_authenticated:
                 return '''
                         <p>Welcome Home</p>
                         <a href="/auth/logout"><button>Logout⬅️</button></a>
+                        <a href="/auth/close-account"><button>Close Account</button></a>
                 '''
         except NotFoundError:
             return HTTPError(status=HTTP_403_FORBIDDEN, body='You do not have the required permissions to access this resource')
