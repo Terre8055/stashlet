@@ -19,7 +19,8 @@ from pydantic import ValidationError
 from models import User, Session
 from redis_om import NotFoundError
 from .public_urls import *
-
+from status import *
+from urls import *
 
 dashboard = Bottle()
 
@@ -28,7 +29,20 @@ dashboard = Bottle()
 
 @dashboard.route(HOME)
 def root():#TODO verify sessions
-    return '''
-            <p>Welcome Home</p>
-            <a href="/auth/logout"><button>Logout⬅️</button></a>
-    '''
+    user_profile = request.cookies.get('profile_id')
+    
+    session_id = request.cookies.get('session_id')
+    
+    if user_profile and session_id:
+
+        try:
+            get_user = Session.get(user_profile)
+            print(get_user, 'user')
+            if get_user.session_id == session_id and get_user.is_authenticated:
+                return '''
+                        <p>Welcome Home</p>
+                        <a href="/auth/logout"><button>Logout⬅️</button></a>
+                '''
+        except NotFoundError:
+            return HTTPError(status=HTTP_403_FORBIDDEN, body='You do not have the required permissions to access this resource')
+    return redirect(GLOGIN)
