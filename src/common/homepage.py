@@ -6,18 +6,18 @@ from bottle import (
     response, 
     redirect, 
     HTTPError, 
-    json_dumps,
-    Bottle
+    static_file,
+    Bottle,
+    template
 )
 from urls import *
 
 home = Bottle()
 
+@home.route('/static/<filepath:path>')
+def serve_static(filepath):
+    return static_file(filepath, root='./static')
 
 @home.get(GHOMEPAGE)
 def root():
-    return '''
-            <p>Stashlet</p>
-            <a href="/auth/register"><button>Get Started</button></a>
-
-    '''
+    return template('index')

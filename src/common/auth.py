@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from bottle import Bottle
 from bottle import (
     get,
-    route,
-    post, 
+    template,
+    static_file, 
     request, 
     HTTPResponse, 
     response, 
@@ -28,13 +28,7 @@ auth = Bottle()
 
 @auth.route(REGISTER)
 def register():
-    return '''
-        <form action="/auth/register" method="post">
-            User-String: <input name="request_string" type="text" />
-            <input value="Register" type="submit" />
-        </form>
-        <a href="/auth/login"><button>Already have an account</button></a>
-    '''
+    return template('register')
     
     
 @auth.route(REGISTER, method='POST')
@@ -100,14 +94,7 @@ def login():
             print('User not found')
             pass
         
-    return '''
-        <form action="/auth/login" method="post">
-            User_string: <input name="request_string" type="text" />
-            <input value="Login" type="submit" />
-        </form>
-        <a href="/auth/register"><button>Create Account</button></a>
-        <a href="/auth/forgot-password"><button>Forgot Password</button></a>
-    '''
+    return template('login')
 
 
 @auth.route(LOGIN, method='POST')
@@ -182,14 +169,7 @@ def do_login():
 @auth.route(FORGOT_PASSWORD)
 def forgot_password():
     
-    return '''
-        <form action="/auth/forgot-password" method="post">
-            UserID: <input name="user_id" type="text" />
-            Secure User String: <input name="sus" type="text" />
-            <input value="Submit" type="submit" />
-        </form>
-        <a href="/auth/login"><button>Abort</button></a>
-    '''
+    return template('forgot-password')
     
 
 @auth.route(FORGOT_PASSWORD, method='POST')
@@ -222,13 +202,7 @@ def do_forgot_password():
 @auth.route(ENTER_NEW_STRING)
 def enter_new_strings():
     
-    return '''
-        <form action="/auth/enter-new-string" method="post">
-            User_String: <input name="user_string" type="text" />
-            <input value="Submit" type="submit" />
-        </form>
-        <a href="/auth/login"><button>Return to Login Page⬅️</button></a>
-    '''
+    return template('enter-new')
 
 
 @auth.route(ENTER_NEW_STRING, method='POST')
@@ -295,13 +269,7 @@ def close_account():
         try:
             get_user = Session.get(user_profile)
             if get_user.session_id == session_id and get_user.is_authenticated:
-                return '''
-                    <form action="/auth/close-account" method="post">
-                        Secure User String: <input name="sus" type="text" />
-                        <input value="Submit" type="submit" />
-                    </form>
-                    <a href="/auth/login"><button>Cancel⬅️</button></a>
-                '''
+                return template('close-account')
         except NotFoundError:
             return HTTPError(status=HTTP_403_FORBIDDEN, body='You do not have the required permissions to access this resource')
     return redirect(GLOGIN)
@@ -336,3 +304,8 @@ def do_close_account():
     except KeyError as e:
         return HTTPError(status=HTTP_400_BAD_REQUEST)
 
+
+
+@auth.route('/static/<filepath:path>')
+def serve_static(filepath):
+    return static_file(filepath, root='./static')

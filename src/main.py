@@ -1,10 +1,11 @@
-from bottle import Bottle, get
+from bottle import Bottle, get, static_file
 from common.auth import auth
 from common.homepage import home
 from public.dashboard import dashboard
 
 
 root = Bottle()
+
 
 
 
