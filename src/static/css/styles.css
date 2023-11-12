@@ -1,43 +1,221 @@
 /* static/css/styles.css */
+
 body {
-    font-family: 'Helvetica Neue', sans-serif;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.font-montserrat {
+    font-family: 'Montserrat', sans-serif;
 }
 
 .container {
     max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.bg-gray-100 {
+    background-color: #f8fafc;
+}
+
+.bg-gray-200 {
+    background-color: #edf2f7;
 }
 
 .bg-white {
     background-color: #ffffff;
 }
 
+.text-blue-600 {
+    color: #3182ce;
+}
+
 .text-gray-600 {
     color: #4a5568;
 }
 
-.bg-blue-500 {
-    background-color: #4299e1;
+.rounded {
+    border-radius: 0.5rem;
 }
 
-.hover\:bg-blue-700:hover {
-    background-color: #2c5282;
+.p-8 {
+    padding: 2rem;
 }
 
-.hover\:bg-red-700:hover {
-    background-color: #ec1d1d;
+.mb-4 {
+    margin-bottom: 1rem;
 }
 
-/* static/css/styles.css */
-
-/* ... (existing styles) */
-
-/* Form Styles */
-input, button {
-    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+.mt-8 {
+    margin-top: 2rem;
 }
 
-input:focus, button:focus {
-    outline: none;
-    border-color: #3182ce;
-    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.5);
+.text-center {
+    text-align: center;
+}
+
+.button-link {
+    display: inline-block;
+    text-decoration: none;
+}
+
+.custom-button {
+    cursor: pointer;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.custom-button:hover {
+    background-color: #2980b9;
+}
+
+
+/* Login */
+
+/* CSS Styles for Login Page (login-styles.css) */
+
+/* Container */
+.login-container {
+    max-width: 400px;
+}
+
+/* Form */
+.login-form {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 0.5rem;
+}
+
+/* Input Field */
+.input-field {
+    mt-1 p-2 w-full border rounded-md;
+}
+
+/* Login Button */
+.login-button {
+    cursor: pointer;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.login-button:hover {
+    background-color: #2980b9;
+}
+
+/* Text Link */
+.text-link {
+    color: #3498db;
+    text-decoration: underline;
+}
+
+.text-link:hover {
+    color: #2980b9;
+}
+
+
+/* Dashboard */
+
+/* Updated dashboard-styles.css */
+
+.d-body {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.d-font-montserrat {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.dashboard-container {
+    display: flex;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background-color: #3498db;
+    color: #fff;
+    min-width: 250px;
+    height: 100vh;
+    padding-top: 20px;
+    position: fixed;
+}
+
+.sidebar-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar-menu {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar-menu li {
+    margin-bottom: 10px;
+}
+
+.sidebar-menu a {
+    text-decoration: none;
+    color: #fff;
+    font-size: 18px;
+    padding: 10px;
+    display: block;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.sidebar-menu a:hover {
+    background-color: #2980b9;
+}
+
+.active {
+    background-color: #2980b9;
+}
+
+/* Settings Button Styles */
+.settings-button {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.settings-button,
+.logout-button {
+    display: inline-block;
+    margin-right: 10px; /* Adjust margin as needed for spacing */
+}
+
+.settings-btn,
+.logout-btn {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.settings-btn:hover,
+.logout-btn:hover {
+    background-color: #c0392b;
+}
+
+
+/* Main Content Styles */
+.main-content {
+    margin-left: 250px; /* Adjust based on the width of the sidebar */
+    padding: 20px;
 }

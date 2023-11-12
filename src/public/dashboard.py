@@ -3,7 +3,8 @@ from http.cookies import SimpleCookie
 from datetime import datetime, timedelta
 from bottle import (
     get,
-    post, 
+    static_file,
+    template, 
     request, 
     HTTPResponse, 
     response, 
@@ -25,6 +26,9 @@ from urls import *
 dashboard = Bottle()
 
 
+@dashboard.route('/static/<filepath:path>')
+def serve_static(filepath):
+    return static_file(filepath, root='./static')
 
 
 @dashboard.route(HOME)
@@ -38,11 +42,7 @@ def root():#TODO verify sessions
         try:
             get_user = Session.get(user_profile)
             if get_user.session_id == session_id and get_user.is_authenticated:
-                return '''
-                        <p>Welcome Home</p>
-                        <a href="/auth/logout"><button>Logout⬅️</button></a>
-                        <a href="/auth/close-account"><button>Close Account</button></a>
-                '''
+                return template('dashboard')
         except NotFoundError:
             return HTTPError(status=HTTP_403_FORBIDDEN, body='You do not have the required permissions to access this resource')
     return redirect(GLOGIN)
