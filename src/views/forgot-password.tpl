@@ -23,13 +23,13 @@
                     <input type="text" id="username" name="sus" class="mt-1 p-2 w-full border rounded-md">
                 </div>
                               
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full w-full">
+                <button type="submit" class="login-button">
                     Verify
                 </button>
             </form>
             
             <p class="text-center mt-4 text-gray-600">
-                Remembered Strings? <a href="/auth/login" class="text-blue-600">Abort Verification</a>.
+                Remembered Strings? <a href="/auth/login" class="text-link">Abort Verification</a>.
             </p>
         </div>
     </div>

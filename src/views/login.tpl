@@ -1,3 +1,4 @@
+<!-- Updated HTML for Login Page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,27 +9,27 @@
     <title>Login to Your Stashlet Kit</title>
 </head>
 <body class="font-montserrat bg-gray-100">
-    <div class="container mx-auto flex items-center justify-center h-screen">
-        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div class="login-container mx-auto flex items-center justify-center h-screen">
+        <div class="login-form bg-white p-8 rounded-lg shadow-md w-full max-w-md">
             <h2 class="text-2xl font-bold mb-6 text-center">Login to Your Stashlet Kit</h2>
             
             <!-- Login Form -->
             <form action="/auth/login" method="post" class="space-y-4">
                 <div>
                     <label for="username" class="block text-sm font-medium text-gray-600">Enter User String</label>
-                    <input type="text" id="username" name="request_string" class="mt-1 p-2 w-full border rounded-md">
+                    <input type="text" id="username" name="request_string" class="input-field">
                 </div>
                               
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full w-full">
+                <button type="submit" class="login-button">
                     Login
                 </button>
             </form>
             
             <p class="text-center mt-4 text-gray-600">
-                Don't have an account? <a href="/auth/register" class="text-blue-600">Register here</a>.
+                Don't have an account? <a href="/auth/register" class="text-link">Register here</a>.
             </p>
-            <p class="text-center mt-4 text-gray-600">
-                Forgot strings? <a href="/auth/forgot-password" class="text-blue-600">Retrieve strings here</a>.
+            <p class="text-center mt-2 text-gray-600">
+                Forgot strings? <a href="/auth/forgot-password" class="text-link">Retrieve strings here</a>.
             </p>
         </div>
     </div>

@@ -19,13 +19,13 @@
                     <input type="text" id="username" name="request_string" class="mt-1 p-2 w-full border rounded-md">
                 </div>
                               
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full w-full">
+                <button type="submit" class="login-button">
                     Register
                 </button>
             </form>
             
             <p class="text-center mt-4 text-gray-600">
-                Already have an account <a href="/auth/login" class="text-blue-600">Go Back</a>.
+                Already have an account <a href="/auth/login" class="text-link">Go Back</a>.
             </p>
         </div>
     </div>
