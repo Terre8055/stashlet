@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.10-alpine
 
 # Set the working directory
 WORKDIR /app
@@ -12,8 +12,6 @@ RUN pip install -r requirements.txt
 
 # Copy the application files into the container
 COPY . /app
-
-
 
 # Expose the port your app runs on
 EXPOSE 8080
