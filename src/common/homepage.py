@@ -16,7 +16,7 @@ home = Bottle()
 
 @home.route('/static/<filepath:path>')
 def serve_static(filepath):
-    return static_file(filepath, root='/app/src/static')
+    return static_file(filepath, root='/app/src/static/css')
 
 @home.get(GHOMEPAGE)
 def root():

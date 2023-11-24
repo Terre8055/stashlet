@@ -308,4 +308,4 @@ def do_close_account():
 
 @auth.route('/static/<filepath:path>')
 def serve_static(filepath):
-    return static_file(filepath, root='/app/src/static')
+    return static_file(filepath, root='/app/src/static/css')
