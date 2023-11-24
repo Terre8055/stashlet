@@ -28,7 +28,7 @@ dashboard = Bottle()
 
 @dashboard.route('/static/<filepath:path>')
 def serve_static(filepath):
-    return static_file(filepath, root='./static')
+    return static_file(filepath, root='/app/src/static')
 
 
 @dashboard.route(HOME)
