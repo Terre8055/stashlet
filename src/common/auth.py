@@ -1,7 +1,8 @@
-import shortuuid, uuid, time
+import shortuuid, uuid, time, os
 from http.cookies import SimpleCookie
 from datetime import datetime, timedelta
 from bottle import Bottle
+import sentry_sdk
 from bottle import (
     get,
     template,
@@ -21,6 +22,16 @@ from redis_om import NotFoundError
 from .common_urls import *
 from urls import *
 from status import *
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+sentry_sdk.init(
+    dsn=os.getenv('SENTRY_URL'),
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
 
 auth = Bottle()
 
@@ -29,8 +40,8 @@ auth = Bottle()
 @auth.route(REGISTER)
 def register():
     return template('register')
-    
-    
+
+        
 @auth.route(REGISTER, method='POST')
 def do_register():
     u_string = request.forms.get('request_string')
